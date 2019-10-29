@@ -1,26 +1,18 @@
 package Notifi.com;
 
 import android.app.Notification;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
 
 
 public class NotificationListener extends NotificationListenerService {
-    NotiData notidata;
-    public final static String TAG = "=====";
-    ArrayList<NotiData> dataArrayList = new ArrayList<>();
-    MyRecyclerAdapter adapter = new MyRecyclerAdapter(dataArrayList);
 
-    private RecyclerView recyclerView;
-    private MyRecyclerAdapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    public final static String TAG = "=====";
 
 
 
@@ -53,16 +45,11 @@ public class NotificationListener extends NotificationListenerService {
         Bundle extras = sbn.getNotification().extras;
 
 
-
-
-
-
         String contentTitle = extras.getString(Notification.EXTRA_TITLE);
         CharSequence contentText = extras.getCharSequence(Notification.EXTRA_TEXT);
         CharSequence subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT);
         CharSequence bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
         CharSequence bigContentTitle = extras.getCharSequence(Notification.EXTRA_TITLE_BIG);
-
 
 
         Icon smallIcon = notification.getSmallIcon();
@@ -79,29 +66,25 @@ public class NotificationListener extends NotificationListenerService {
                 " / packageName : " + sbn.getPackageName()
         );
 
+        DBHelper helper = new DBHelper(this);
+        SQLiteDatabase db = helper.getWritableDatabase();
 
-        NotiData data = new NotiData();
-        data.setApp_name(sbn.getPackageName());
-        data.setTitle_of(contentTitle);
-        data.setContent_of(contentText.toString());
-        data.setTime_of("now");
-        //data.setResId(listResId.get(i));
-        // 각 값이 들어간 data를 adapter에 추가
-        adapter.addItem(data);
-        adapter.notifyDataSetChanged();
-
+        String sql = "insert into TestTabel (textData) values(?)";
+        String [] arg1 = {contentTitle};
+        db.execSQL(sql, arg1);
     }
 
 
-    @Override
-    public void onNotificationRemoved(StatusBarNotification sbn) {
+        @Override
+        public void onNotificationRemoved (StatusBarNotification sbn){
 
-        // 알림이 지워졌을 때
-        super.onNotificationRemoved(sbn);
-        Log.e(TAG, "onNotificationRemoved():: ");
+            // 알림이 지워졌을 때
+            super.onNotificationRemoved(sbn);
+            Log.e(TAG, "onNotificationRemoved():: ");
 
-        Log.e(TAG, "NotiIRemoved:: " +
-                " packageName: " + sbn.getPackageName() +
-                " id: " + sbn.getId());
+            Log.e(TAG, "NotiIRemoved:: " +
+                    " packageName: " + sbn.getPackageName() +
+                    " id: " + sbn.getId());
+        }
     }
-}
+
